@@ -124,6 +124,9 @@ private:
     float mPhi = 0.2f*XM_PI;
     float mRadius = 15.0f;
 
+	float mSunTheta = 1.25f * XM_PI;
+	float mSunPhi = XM_PIDIV4;
+
     POINT mLastMousePos;
 };
 
@@ -428,12 +431,16 @@ void EnvLightingApp::UpdateMainPassCB(const GameTimer& gt)
 	mMainPassCB.TotalTime = gt.TotalTime();
 	mMainPassCB.DeltaTime = gt.DeltaTime();
 	mMainPassCB.AmbientLight = { 0.25f, 0.25f, 0.35f, 1.0f };
-	mMainPassCB.Lights[0].Direction = { 0.57735f, -0.57735f, 0.57735f };
-	mMainPassCB.Lights[0].Strength = { 0.6f, 0.6f, 0.6f };
-	mMainPassCB.Lights[1].Direction = { -0.57735f, -0.57735f, 0.57735f };
-	mMainPassCB.Lights[1].Strength = { 0.3f, 0.3f, 0.3f };
-	mMainPassCB.Lights[2].Direction = { 0.0f, -0.707f, -0.707f };
-	mMainPassCB.Lights[2].Strength = { 0.15f, 0.15f, 0.15f };
+	
+	XMVECTOR lightDir = -MathHelper::SphericalToCartesian(0.0f, mSunTheta, mSunPhi);
+	XMStoreFloat3(&mMainPassCB.Lights[0].Direction, lightDir);
+	mMainPassCB.Lights[0].Position = { 0.f, 1.f, 10.f };
+	mMainPassCB.Lights[0].Strength = { 0.f, 1.0f, 0.f };
+
+	mMainPassCB.Lights[1].Direction = { 0.f, -1.f, 0.f };
+	mMainPassCB.Lights[1].Position = { 0.f, 5.f, -10.f };
+	mMainPassCB.Lights[1].Strength = { 0.f, 0.0f, 1.5f };
+	mMainPassCB.Lights[1].SpotPower = 8;
 
 	auto currPassCB = mCurrFrameResource->PassCB.get();
 	currPassCB->CopyData(0, mMainPassCB);
