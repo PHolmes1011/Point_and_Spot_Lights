@@ -125,8 +125,9 @@ private:
     float mPhi = 0.2f*XM_PI;
     float mRadius = 15.0f;
 
-	float mSunTheta = 1.25f * XM_PI;
-	float mSunPhi = XM_PIDIV4;
+	float mLightTheta = 1.25f * XM_PI;
+	float mLightPhi = XM_PIDIV4;
+	bool mLightState = true;
 
     POINT mLastMousePos;
 };
@@ -335,6 +336,8 @@ void EnvLightingApp::OnMouseMove(WPARAM btnState, int x, int y)
  
 void EnvLightingApp::OnKeyboardInput(const GameTimer& gt)
 {
+	if (GetAsyncKeyState('F') & 0x8000)
+		mLightState = !mLightState;
 }
  
 void EnvLightingApp::UpdateCamera(const GameTimer& gt)
@@ -435,14 +438,17 @@ void EnvLightingApp::UpdateMainPassCB(const GameTimer& gt)
 	mMainPassCB.DeltaTime = gt.DeltaTime();
 	mMainPassCB.AmbientLight = { 0.01f, 0.01f, 0.01f, 1.0f };
 	
-	XMVECTOR lightDir = -MathHelper::SphericalToCartesian(0.0f, mSunTheta, mSunPhi);
+	XMVECTOR lightDir = -MathHelper::SphericalToCartesian(0.0f, mLightTheta, mLightPhi);
 	XMStoreFloat3(&mMainPassCB.Lights[0].Direction, lightDir);
 	mMainPassCB.Lights[0].Position = mEyePos;
 	mMainPassCB.Lights[0].Strength = { 0.25f, 0.25f, 0.25f };
 
 	mMainPassCB.Lights[1].Direction = mEyeForward;
 	mMainPassCB.Lights[1].Position = mEyePos;
-	mMainPassCB.Lights[1].Strength = { 1.f, 1.f, 1.f };
+	if(mLightState)
+		mMainPassCB.Lights[1].Strength = { 1.f, 1.f, 1.f };
+	else
+		mMainPassCB.Lights[1].Strength = { 0.f, 0.f, 0.f };
 	mMainPassCB.Lights[1].SpotPower = 12;
 	mMainPassCB.Lights[1].FalloffEnd = 18;
 
