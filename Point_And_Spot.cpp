@@ -117,6 +117,7 @@ private:
     PassConstants mMainPassCB;
 
 	XMFLOAT3 mEyePos = { 0.0f, 0.0f, 0.0f };
+	XMFLOAT3 mEyeForward = { 0.0f, 0.0f, 0.0f };
 	XMFLOAT4X4 mView = MathHelper::Identity4x4();
 	XMFLOAT4X4 mProj = MathHelper::Identity4x4();
 
@@ -250,7 +251,7 @@ void EnvLightingApp::Draw(const GameTimer& gt)
 		D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
 
     // Clear the back buffer and depth buffer.
-    mCommandList->ClearRenderTargetView(CurrentBackBufferView(), Colors::LightSteelBlue, 0, nullptr);
+    mCommandList->ClearRenderTargetView(CurrentBackBufferView(), Colors::Black, 0, nullptr);
     mCommandList->ClearDepthStencilView(DepthStencilView(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 
     // Specify the buffers we are going to render to.
@@ -350,6 +351,8 @@ void EnvLightingApp::UpdateCamera(const GameTimer& gt)
 
 	XMMATRIX view = XMMatrixLookAtLH(pos, target, up);
 	XMStoreFloat4x4(&mView, view);
+
+	mEyeForward = { mView._13, mView._23, mView._33 };
 }
 
 void EnvLightingApp::AnimateMaterials(const GameTimer& gt)
@@ -430,17 +433,18 @@ void EnvLightingApp::UpdateMainPassCB(const GameTimer& gt)
 	mMainPassCB.FarZ = 1000.0f;
 	mMainPassCB.TotalTime = gt.TotalTime();
 	mMainPassCB.DeltaTime = gt.DeltaTime();
-	mMainPassCB.AmbientLight = { 0.25f, 0.25f, 0.35f, 1.0f };
+	mMainPassCB.AmbientLight = { 0.01f, 0.01f, 0.01f, 1.0f };
 	
 	XMVECTOR lightDir = -MathHelper::SphericalToCartesian(0.0f, mSunTheta, mSunPhi);
 	XMStoreFloat3(&mMainPassCB.Lights[0].Direction, lightDir);
-	mMainPassCB.Lights[0].Position = { 0.f, 1.f, 10.f };
-	mMainPassCB.Lights[0].Strength = { 0.f, 1.0f, 0.f };
+	mMainPassCB.Lights[0].Position = mEyePos;
+	mMainPassCB.Lights[0].Strength = { 0.25f, 0.25f, 0.25f };
 
-	mMainPassCB.Lights[1].Direction = { 0.f, -1.f, 0.f };
-	mMainPassCB.Lights[1].Position = { 0.f, 5.f, -10.f };
-	mMainPassCB.Lights[1].Strength = { 0.f, 0.0f, 1.5f };
-	mMainPassCB.Lights[1].SpotPower = 8;
+	mMainPassCB.Lights[1].Direction = mEyeForward;
+	mMainPassCB.Lights[1].Position = mEyePos;
+	mMainPassCB.Lights[1].Strength = { 1.f, 1.f, 1.f };
+	mMainPassCB.Lights[1].SpotPower = 12;
+	mMainPassCB.Lights[1].FalloffEnd = 18;
 
 	auto currPassCB = mCurrFrameResource->PassCB.get();
 	currPassCB->CopyData(0, mMainPassCB);
