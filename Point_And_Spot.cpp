@@ -450,7 +450,7 @@ void EnvLightingApp::UpdateMainPassCB(const GameTimer& gt)
 	else
 		mMainPassCB.Lights[1].Strength = { 0.f, 0.f, 0.f };
 	mMainPassCB.Lights[1].SpotPower = 12;
-	mMainPassCB.Lights[1].FalloffEnd = 18;
+	mMainPassCB.Lights[1].FalloffEnd = 25;
 
 	auto currPassCB = mCurrFrameResource->PassCB.get();
 	currPassCB->CopyData(0, mMainPassCB);

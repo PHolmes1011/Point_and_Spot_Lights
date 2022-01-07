@@ -26,7 +26,7 @@ struct Material
 float CalcAttenuation(float d, float falloffStart, float falloffEnd)
 {
     // Linear falloff.
-    return saturate((falloffEnd-d) / (falloffEnd - falloffStart));
+    return saturate((falloffEnd) / (d * d));
 }
 
 // Schlick gives an approximation to Fresnel reflectance (see pg. 233 "Real-Time Rendering 3rd Ed.").
