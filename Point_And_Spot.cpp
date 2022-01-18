@@ -445,10 +445,7 @@ void EnvLightingApp::UpdateMainPassCB(const GameTimer& gt)
 
 	mMainPassCB.Lights[1].Direction = mEyeForward;
 	mMainPassCB.Lights[1].Position = mEyePos;
-	if(mLightState)
-		mMainPassCB.Lights[1].Strength = { 1.f, 1.f, 1.f };
-	else
-		mMainPassCB.Lights[1].Strength = { 0.f, 0.f, 0.f };
+	mMainPassCB.Lights[1].Strength = { (float)mLightState, (float)mLightState, (float)mLightState };
 	mMainPassCB.Lights[1].SpotPower = 12;
 	mMainPassCB.Lights[1].FalloffEnd = 18;
 
